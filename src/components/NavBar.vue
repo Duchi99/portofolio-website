@@ -15,7 +15,7 @@
       <!-- Logo -->
       <router-link
         v-if="!isCollapsed"
-        to="/home"
+        to="/"
         class="text-2xl font-bold text-white tracking-wider"
       >
         <Icon icon="material-symbols:logo-dev-outline" class="w-20 h-16" />
@@ -36,33 +36,6 @@
       <li class="relative group">
         <router-link
           to="/"
-          class="flex items-center px-4 py-2 text-lg font-medium text-gray-300 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-500"
-          active-class="bg-gray-700 text-white"
-        >
-          <!-- Icon -->
-          <Icon
-            icon="solar:home-outline"
-            :class="isCollapsed ? 'w-8 h-8' : 'w-6 h-6'"
-            class="transition-all duration-500"
-          />
-
-          <!-- Text/Tooltip (based on isCollapsed) -->
-          <span
-            :class="
-              !isCollapsed
-                ? 'ml-2'
-                : 'absolute left-[4.5rem] top-1/2 transform -translate-y-1/2 bg-gray-700 text-white text-sm rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-500'
-            "
-            v-if="!isMobile"
-          >
-            Home
-          </span>
-        </router-link>
-      </li>
-
-      <li class="relative group">
-        <router-link
-          to="/about"
           class="flex items-center px-4 py-2 text-lg font-medium text-gray-300 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-500"
           active-class="bg-gray-700 text-white"
         >

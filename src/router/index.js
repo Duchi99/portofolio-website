@@ -1,17 +1,11 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from "vue-router";
-import Home from "../views/Home.vue";
 import About from "../views/About.vue";
 import Contact from "../views/Contact.vue";
 
 const routes = [
   {
     path: "/",
-    name: "Home",
-    component: Home,
-  },
-  {
-    path: "/about",
     name: "About",
     component: About,
   },
@@ -19,6 +13,11 @@ const routes = [
     path: "/contact",
     name: "Contact",
     component: Contact,
+  },
+  // Catch-all route to redirect any unmatched routes to "/"
+  {
+    path: "/:pathMatch(.*)*",
+    redirect: "/",
   },
 ];
 
