@@ -4,9 +4,7 @@
       v-if="isVisible"
       class="fixed inset-0 bg-gray-600 bg-opacity-75 flex justify-center items-start"
     >
-      <div
-        class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg shadow-lg mt-12 w-72"
-      >
+      <div :class="dialogClass" class="p-4 rounded-lg shadow-lg mt-12 w-72">
         <div class="flex items-center">
           <h2 class="text-lg font-semibold">{{ title }}</h2>
         </div>
@@ -16,7 +14,8 @@
         <div class="mt-4 text-right">
           <button
             @click="closeDialog"
-            class="inline-block px-4 py-2 text-white bg-yellow-600 rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring focus:ring-yellow-200"
+            :class="buttonClass"
+            class="inline-block px-4 py-2 text-white rounded-lg hover:focus:outline-none focus:ring"
           >
             OK
           </button>
@@ -27,10 +26,13 @@
 </template>
 
 <script setup>
-import { onMounted, onBeforeUnmount, watch, ref } from "vue";
+import { onMounted, onBeforeUnmount, watch, ref, computed } from "vue";
 
 // Props for dialog configuration
 const props = defineProps({
+  type: {
+    type: String,
+  },
   title: {
     type: String,
     default: "Message",
@@ -53,8 +55,6 @@ const props = defineProps({
     default: 3000, // Delay in milliseconds
   },
 });
-
-const show = ref(true);
 
 // Emit the close event to the parent component
 const emit = defineEmits(["close"]);
@@ -102,6 +102,34 @@ onMounted(() => {
 onBeforeUnmount(() => {
   if (autoCloseTimeout) {
     clearTimeout(autoCloseTimeout);
+  }
+});
+
+// Computed class for the dialog based on the type prop
+const dialogClass = computed(() => {
+  switch (props.type) {
+    case "ok":
+      return "bg-green-100 border-l-4 border-green-500 text-green-700";
+    case "warning":
+      return "bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700";
+    case "error":
+      return "bg-red-100 border-l-4 border-red-500 text-red-700";
+    default:
+      return "bg-gray-100 border-l-4 border-gray-500 text-gray-700"; // Default or neutral dialog style
+  }
+});
+
+// Computed class for the button based on the type prop
+const buttonClass = computed(() => {
+  switch (props.type) {
+    case "ok":
+      return "bg-green-600 hover:bg-green-700 text-white focus:ring-green-200";
+    case "warning":
+      return "bg-yellow-600 hover:bg-yellow-700 text-white focus:ring-yellow-200";
+    case "error":
+      return "bg-red-600 hover:bg-red-700 text-white focus:ring-red-200";
+    default:
+      return "bg-gray-600 hover:bg-gray-700 text-white focus:ring-gray-200";
   }
 });
 </script>

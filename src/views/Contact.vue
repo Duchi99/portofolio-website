@@ -100,7 +100,17 @@
 
     <!-- Contact Information Section -->
     <div class="max-w-4xl mx-auto mt-12 text-center">
-      <h2 class="text-2xl font-semibold mb-4">Other ways to reach me</h2>
+      <h2 class="text-2xl font-semibold">Other ways to reach me</h2>
+      <!-- Chat with me now Button -->
+      <div class="flex justify-center mb-4">
+        <button
+          @click="openChat"
+          class="mt-6 bg-blue-500 text-white font-bold py-2 px-4 rounded flex items-center shadow-lg hover:bg-blue-600 transition duration-300 ease-in-out"
+        >
+          <Icon icon="simple-icons:livechat" class="mr-2" />
+          Chat with me now
+        </button>
+      </div>
       <p class="text-lg text-gray-600">
         <strong>Email:</strong> robertducan30@gmail.com
       </p>
@@ -111,11 +121,12 @@
   </div>
   <!-- Dialog component -->
   <Dialog
+    :type="dialogType"
     :isVisible="showDialog"
-    title="Validation Error"
+    :title="dialogTitle"
     :message="dialogMessage"
     :autoClose="true"
-    :autoCloseDelay="5000"
+    :autoCloseDelay="dialogAutoCloseDelay"
     @close="showDialog = false"
   >
   </Dialog>
@@ -137,14 +148,13 @@ const formData = ref({
 const fileInput = ref(null);
 const showDialog = ref(false);
 const dialogMessage = ref("");
+const dialogType = ref("");
+const dialogTitle = ref("");
+
+const dialogAutoCloseDelay = ref(5000);
 
 const handleFileUpload = (event) => {
   formData.value.file = event.target.files[0];
-};
-
-const toggleDialog = () => {
-  showDialog.value = !showDialog.value;
-  console.log("Toggling dialog visibility:", showDialog.value);
 };
 
 const clearFile = () => {
@@ -152,23 +162,56 @@ const clearFile = () => {
   fileInput.value.value = null;
 };
 
-const submitForm = () => {
-  // Validation: ensure at least email or phone number, plus message or file
+const submitForm = async () => {
+  // Validate that the form has required fields (name, email, message, etc.)
   if (
     (!formData.value.email && !formData.value.phoneNumber) ||
     (!formData.value.message && !formData.value.file)
   ) {
     dialogMessage.value =
       "Please provide either an email or phone number, and a message or job description.";
-    showDialog.value = true; // Show dialog with validation message
-    return; // Prevent submission if validation fails
+    showDialog.value = true;
+    dialogType.value = "warning";
+    dialogTitle.value = "Validation Error";
+    return; // Stop if validation fails
   }
 
-  // If validation passes, proceed with form submission
-  // If validation passes, proceed with form submission
-  console.log("Form data:", formData.value);
-  dialogMessage.value = "Your message has been sent!";
-  showDialog.value = true; // Show dialog with success message
+  // Prepare the form data to be sent to the backend
+  const formDataToSend = new FormData();
+  formDataToSend.append("name", formData.value.name);
+  formDataToSend.append("email", formData.value.email);
+  formDataToSend.append("phone", formData.value.phoneNumber);
+  formDataToSend.append("message", formData.value.message);
+
+  // If a file is uploaded, append it to the form data
+  if (formData.value.file) {
+    formDataToSend.append("file", formData.value.file);
+  }
+
+  try {
+    // Send the form data to the backend
+    const response = await fetch("http://localhost:3000/api/contact", {
+      method: "POST",
+      body: formDataToSend,
+    });
+
+    if (response.ok) {
+      dialogMessage.value = "Your message has been sent!";
+      dialogType.value = "ok";
+      dialogTitle.value = "Success";
+      dialogAutoCloseDelay.value = 1300;
+    } else {
+      dialogMessage.value = "Error sending message. Please try again later.";
+      dialogType.value = "error";
+      dialogTitle.value = "Error";
+    }
+  } catch (error) {
+    console.log("Error sending message:", error);
+    dialogMessage.value = "Failed to submit the form. Please try again.";
+  }
+
+  // Show dialog with a success/failure message
+  showDialog.value = true;
 };
 </script>
 
