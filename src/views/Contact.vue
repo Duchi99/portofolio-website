@@ -66,37 +66,77 @@
           >
             Upload File
           </label>
-          <div class="flex items-center">
+          <div
+            v-for="(fileObj, index) in formData.files"
+            :key="fileObj.id"
+            class="flex items-center"
+          >
             <!-- Hidden File Input -->
             <input
               type="file"
-              id="file-upload"
-              ref="fileInput"
+              :id="'file-upload-' + index"
               accept=".pdf,.docx,.txt"
               class="hidden"
-              @change="handleFileUpload"
+              @change="(event) => handleFileUpload(event, index)"
             />
             <!-- Custom Button (Icon & Text) -->
-            <label for="file-upload" class="flex items-center cursor-pointer">
+            <label
+              :for="'file-upload-' + index"
+              class="flex items-center cursor-pointer"
+            >
               <!-- Icon (Clickable) -->
               <Icon
                 icon="icon-park-outline:upload-one"
                 class="w-10 h-10 text-blue-600 hover:text-blue-700"
               />
               <!-- Display Selected File Name -->
-              <span class="ml-3 text-sm text-gray-500" v-if="formData.file">
-                {{ formData.file.name }}
+              <span class="ml-3 text-sm text-gray-500" v-if="fileObj.file">
+                {{ formData.files[index].file.name }}
               </span>
               <span class="ml-3 text-sm text-gray-500" v-else
                 >No file chosen</span
               >
             </label>
-            <Icon
-              v-if="formData.file"
-              icon="material-symbols:cancel-outline"
-              class="w-6 h-6 ml-2 text-red-700 hover:text-red-900 cursor-pointer"
-              @click="clearFile"
-            />
+
+            <div class="relative flex items-center">
+              <!-- Remove File Button -->
+              <Icon
+                v-if="fileObj.file || index > 0"
+                icon="material-symbols:cancel-outline"
+                class="w-6 h-6 ml-2 text-red-700 hover:text-red-900 cursor-pointer"
+                @click="clearFile(index)"
+                @mouseover="startShowTooltip(index, 'remove')"
+                @mouseleave="stopShowTooltip('remove')"
+                @mouseout="stopShowTooltip('remove')"
+              />
+
+              <!-- Icon tooltip (Hover) -->
+              <span
+                v-if="showRemoveFileTooltip === index"
+                class="absolute bg-gray-700 text-white text-sm rounded-lg px-2 py-1 -top-10 left-0 transform translate-x-1/2 opacity-100 duration-300 pointer-events-none"
+              >
+                Remove file
+              </span>
+            </div>
+            <div class="relative flex items-center">
+              <!-- Add Another File Button -->
+              <Icon
+                v-if="index === 0"
+                icon="material-symbols:add-circle-outline"
+                class="w-6 h-6 ml-2 text-blue-600 hover:text-blue-700 cursor-pointer"
+                @click="addAnotherFile"
+                @mouseover="startShowTooltip(null, 'add')"
+                @mouseleave="stopShowTooltip('add')"
+                @mouseout="stopShowTooltip('add')"
+              />
+              <!-- Icon tooltip (Hover) -->
+              <span
+                v-if="showAddFileTooltip && index === 0"
+                class="absolute bg-gray-700 text-white text-sm rounded-lg px-2 py-1 -top-16 left-0 transform translate-x-1/2 opacity-100 duration-300 pointer-events-none"
+              >
+                Add another file
+              </span>
+            </div>
           </div>
         </div>
 
@@ -159,10 +199,13 @@ const formData = ref({
   email: "",
   phoneNumber: "",
   message: "",
-  file: null,
+  files: [{ file: null, id: Date.now() }],
 });
 
-const fileInput = ref(null);
+// Use boolean for add tooltip as it can be seen just on the same row
+const showAddFileTooltip = ref(false);
+// Use index for remove tooltip and it can be seen from different rows
+const showRemoveFileTooltip = ref(false);
 const showDialog = ref(false);
 const dialogMessage = ref("");
 const dialogType = ref("");
@@ -170,13 +213,17 @@ const dialogTitle = ref("");
 
 const dialogAutoCloseDelay = ref(5000);
 
-const handleFileUpload = (event) => {
-  formData.value.file = event.target.files[0];
+const handleFileUpload = (event, index) => {
+  formData.value.files[index].file = event.target.files[0];
 };
 
-const clearFile = () => {
-  formData.value.file = null;
-  fileInput.value.value = null;
+const clearFile = (index) => {
+  formData.value.files.splice(index, 1);
+};
+
+const addAnotherFile = () => {
+  // Add a new file input with a unique ID
+  formData.value.files.push({ file: null, id: Date.now() });
 };
 
 const submitForm = async () => {
@@ -201,8 +248,11 @@ const submitForm = async () => {
   formDataToSend.append("message", formData.value.message);
 
   // If a file is uploaded, append it to the form data
-  if (formData.value.file) {
-    formDataToSend.append("file", formData.value.file);
+  const files = formData.value.files.filter((fileObj) => fileObj.file);
+  if (files && files.length > 0) {
+    files.forEach((fileObj, index) => {
+      formDataToSend.append(`file${index}`, fileObj.file);
+    });
   }
 
   try {
@@ -231,12 +281,42 @@ const submitForm = async () => {
   showDialog.value = true;
 };
 
+let tooltipTimeout = null; // To store timeout reference
+
+const startShowTooltip = (index, type) => {
+  tooltipTimeout = setTimeout(() => {
+    switch (type) {
+      case "add":
+        showAddFileTooltip.value = true;
+      case "remove":
+        showRemoveFileTooltip.value = index;
+        break;
+      default:
+        break;
+    }
+  }, 1000);
+};
+
+const stopShowTooltip = (type) => {
+  clearTimeout(tooltipTimeout);
+  switch (type) {
+    case "add":
+      showAddFileTooltip.value = false;
+      break;
+    case "remove":
+      showRemoveFileTooltip.value = null;
+      break;
+    default:
+      break;
+  }
+};
+
 const openChat = () => {
   showDialog.value = true;
   dialogType.value = "info";
   dialogTitle.value = "Chat with Robert LIVE";
   dialogMessage.value = "COMING SOON! Stay tuned for more updates.";
-  dialogAutoCloseDelay.value = 2500; // No auto-close
+  dialogAutoCloseDelay.value = 3000;
 };
 </script>
 
