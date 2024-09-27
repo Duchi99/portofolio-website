@@ -2,7 +2,12 @@
   <Transition>
     <div
       v-if="isVisible"
-      class="fixed inset-0 bg-gray-600 bg-opacity-75 flex justify-center items-start"
+      :class="[
+        'fixed top-0 left-0 w-full h-full flex justify-center items-start',
+        isBlocking
+          ? 'pointer-events-auto bg-gray-600 bg-opacity-75'
+          : 'pointer-events-none',
+      ]"
     >
       <div :class="dialogClass" class="p-4 rounded-lg shadow-lg mt-12 w-72">
         <div class="flex items-center">
@@ -53,6 +58,10 @@ const props = defineProps({
   autoCloseDelay: {
     type: Number,
     default: 3000, // Delay in milliseconds
+  },
+  isBlocking: {
+    type: Boolean,
+    default: false, // Blocks interaction with rest of site
   },
 });
 
@@ -114,6 +123,8 @@ const dialogClass = computed(() => {
       return "bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700";
     case "error":
       return "bg-red-100 border-l-4 border-red-500 text-red-700";
+    case "info":
+      return "bg-blue-100 border-l-4 border-blue-500 text-blue-700";
     default:
       return "bg-gray-100 border-l-4 border-gray-500 text-gray-700"; // Default or neutral dialog style
   }
@@ -128,6 +139,8 @@ const buttonClass = computed(() => {
       return "bg-yellow-600 hover:bg-yellow-700 text-white focus:ring-yellow-200";
     case "error":
       return "bg-red-600 hover:bg-red-700 text-white focus:ring-red-200";
+    case "info":
+      return "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-200";
     default:
       return "bg-gray-600 hover:bg-gray-700 text-white focus:ring-gray-200";
   }

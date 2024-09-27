@@ -32,6 +32,19 @@
           />
         </div>
 
+        <!-- Phone Number Field -->
+        <div class="mb-6">
+          <label for="phone" class="block text-sm font-medium text-gray-700"
+            >Phone Number</label
+          >
+          <input
+            type="tel"
+            v-model="formData.phone"
+            id="phone"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+
         <!-- Message Field -->
         <div class="mb-6">
           <label for="message" class="block text-sm font-medium text-gray-700">
@@ -45,6 +58,7 @@
           ></textarea>
         </div>
 
+        <!-- File input -->
         <div class="mb-6">
           <label
             for="file-upload"
@@ -111,9 +125,11 @@
           Chat with me now
         </button>
       </div>
+      <!-- My email -->
       <p class="text-lg text-gray-600">
         <strong>Email:</strong> robertducan30@gmail.com
       </p>
+      <!-- My phone number -->
       <p class="text-lg text-gray-600">
         <strong>Phone:</strong> (+44) 7472 561 088
       </p>
@@ -128,6 +144,7 @@
     :autoClose="true"
     :autoCloseDelay="dialogAutoCloseDelay"
     @close="showDialog = false"
+    :isBlocking="false"
   >
   </Dialog>
 </template>
@@ -212,6 +229,14 @@ const submitForm = async () => {
 
   // Show dialog with a success/failure message
   showDialog.value = true;
+};
+
+const openChat = () => {
+  showDialog.value = true;
+  dialogType.value = "info";
+  dialogTitle.value = "Chat with Robert LIVE";
+  dialogMessage.value = "COMING SOON! Stay tuned for more updates.";
+  dialogAutoCloseDelay.value = 2500; // No auto-close
 };
 </script>
 
